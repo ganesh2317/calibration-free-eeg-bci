@@ -1,0 +1,128 @@
+{
+  "model": "DANN (EEGNet Backbone)",
+  "calibration": "None (Zero-shot Source-Only Domain-Adversarial LOSO)",
+  "n_subjects": 10,
+  "total_trials": 900,
+  "mean_accuracy": 0.5933333333333333,
+  "std_accuracy": 0.08134668985654725,
+  "mean_precision": 0.658893295445963,
+  "std_precision": 0.1538510370309288,
+  "mean_recall": 0.5065810939461521,
+  "std_recall": 0.19098746584890366,
+  "mean_f1": 0.5330520603247692,
+  "std_f1": 0.16618358950017967,
+  "mean_kappa": 0.1852900563292328,
+  "std_kappa": 0.16255348624539998,
+  "per_fold": [
+    {
+      "accuracy": 0.6444444444444445,
+      "precision": 0.7727272727272727,
+      "recall": 0.38636363636363635,
+      "f1": 0.5151515151515151,
+      "cohen_kappa": 0.28071928071928076,
+      "test_subject": "S001",
+      "n_train_trials": 648,
+      "n_val_trials": 162,
+      "n_test_trials": 90
+    },
+    {
+      "accuracy": 0.5111111111111111,
+      "precision": 0.5142857142857142,
+      "recall": 0.4,
+      "f1": 0.45,
+      "cohen_kappa": 0.022222222222222254,
+      "test_subject": "S002",
+      "n_train_trials": 648,
+      "n_val_trials": 162,
+      "n_test_trials": 90
+    },
+    {
+      "accuracy": 0.5444444444444444,
+      "precision": 0.5555555555555556,
+      "recall": 0.5434782608695652,
+      "f1": 0.5494505494505495,
+      "cohen_kappa": 0.0888888888888889,
+      "test_subject": "S003",
+      "n_train_trials": 648,
+      "n_val_trials": 162,
+      "n_test_trials": 90
+    },
+    {
+      "accuracy": 0.6,
+      "precision": 0.6216216216216216,
+      "recall": 0.5111111111111111,
+      "f1": 0.5609756097560976,
+      "cohen_kappa": 0.19999999999999996,
+      "test_subject": "S004",
+      "n_train_trials": 648,
+      "n_val_trials": 162,
+      "n_test_trials": 90
+    },
+    {
+      "accuracy": 0.5111111111111111,
+      "precision": 0.5294117647058824,
+      "recall": 0.574468085106383,
+      "f1": 0.5510204081632653,
+      "cohen_kappa": 0.016393442622950838,
+      "test_subject": "S005",
+      "n_train_trials": 648,
+      "n_val_trials": 162,
+      "n_test_trials": 90
+    },
+    {
+      "accuracy": 0.5333333333333333,
+      "precision": 1.0,
+      "recall": 0.06666666666666667,
+      "f1": 0.125,
+      "cohen_kappa": 0.06666666666666665,
+      "test_subject": "S006",
+      "n_train_trials": 648,
+      "n_val_trials": 162,
+      "n_test_trials": 90
+    },
+    {
+      "accuracy": 0.5666666666666667,
+      "precision": 0.5454545454545454,
+      "recall": 0.6818181818181818,
+      "f1": 0.6060606060606061,
+      "cohen_kappa": 0.13759213759213762,
+      "test_subject": "S007",
+      "n_train_trials": 648,
+      "n_val_trials": 162,
+      "n_test_trials": 90
+    },
+    {
+      "accuracy": 0.6444444444444445,
+      "precision": 0.6744186046511628,
+      "recall": 0.6170212765957447,
+      "f1": 0.6444444444444445,
+      "cohen_kappa": 0.2902907836372597,
+      "test_subject": "S008",
+      "n_train_trials": 648,
+      "n_val_trials": 162,
+      "n_test_trials": 90
+    },
+    {
+      "accuracy": 0.6,
+      "precision": 0.5897435897435898,
+      "recall": 0.5348837209302325,
+      "f1": 0.5609756097560976,
+      "cohen_kappa": 0.19523099850968706,
+      "test_subject": "S009",
+      "n_train_trials": 648,
+      "n_val_trials": 162,
+      "n_test_trials": 90
+    },
+    {
+      "accuracy": 0.7777777777777778,
+      "precision": 0.7857142857142857,
+      "recall": 0.75,
+      "f1": 0.7674418604651163,
+      "cohen_kappa": 0.5548961424332344,
+      "test_subject": "S010",
+      "n_train_trials": 648,
+      "n_val_trials": 162,
+      "n_test_trials": 90
+    }
+  ]
+}

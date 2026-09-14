@@ -1,0 +1,35 @@
+# Virtual environment
+.venv/
+env/
+venv/
+ENV/
+
+# Raw and processed datasets (regenerable via src/data scripts)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/subjects/
+
+# Model checkpoints (regenerable via src/training scripts)
+results/models/*
+!results/models/.gitkeep
+
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Testing & linters
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs & temp files
+*.log
+.system_generated/
+scratch/
+.DS_Store
+Thumbs.db
