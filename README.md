@@ -162,8 +162,17 @@ calibration-free-eeg-bci/
 ```
 
 ---
+## 💻 Quickstart & Full Pipeline Reproduction
 
-## 💻 Quickstart & Execution Guide
+### ⚠️ Important Notice on Git-Excluded Artifacts
+To keep the git repository lightweight and fast (~5 MB), the following large binary directories are excluded via `.gitignore`:
+- `data/raw/` (~300 MB): Raw PhysioNet EDF files.
+- `data/processed/` (~147 MB): Subject-wise extracted `.npy` trial arrays.
+- `results/models/` (~32 MB): Trained PyTorch model checkpoints (`.pt`).
+
+> **Streamlit Demo Requirement:** The interactive demo (`streamlit run app/app.py`) runs real, non-mocked forward inference on held-out test data. Therefore, `data/processed/` and `results/models/` must exist locally before launching the app. Follow the reproduction steps below to regenerate them from scratch.
+
+---
 
 ### 1. Installation & Environment Setup
 
@@ -183,44 +192,37 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Run Automated Test Suite
+---
 
-```bash
-pytest -v
-```
-*Expected: 28 passed in ~8-10 seconds.*
+### 2. Step-by-Step Pipeline Reproduction & Real Time Estimates
+
+All scripts run out-of-the-box using the central configuration in `src/utils/config.py`. Below are the exact commands and observed execution times on standard CPU hardware:
+
+| Step | Command | Description | Observed Time (CPU) | Output Artifacts |
+|:---:|:---|:---|:---:|:---|
+| **1** | `python src/data/download_dataset.py` | Concurrently downloads 60 raw EDF files from PhysioNet for subjects S001–S010 (runs R04, R05, R06, R08, R09, R10). | **2 – 4 min** *(network dependent)* | `data/raw/S001/` ... `data/raw/S010/` (~300 MB) |
+| **2** | `python src/data/verify_raw.py` | Verifies data integrity: 64 channels, 160.0 Hz sampling rate, zero NaNs/Infs. | **~10 sec** | Verification console report |
+| **3** | `python src/data/extract_trials.py` | Applies 8–30 Hz zero-phase FIR bandpass filtering on continuous data, per-subject Z-score normalization, and extracts 4.0s epochs (64×640). | **30 – 45 sec** | `data/processed/{SUBJECT}_X.npy`, `{SUBJECT}_y.npy` (900 total trials) |
+| **4** | `python src/training/loso.py` | Executes 10-Fold Leave-One-Subject-Out (LOSO) cross-validation for the classical **CSP + LDA** baseline. | **5 – 8 sec** | `results/metrics/csp_lda_loso_results.json`, `.csv`, confusion matrices |
+| **5** | `python src/training/deep_loso.py` | Trains and evaluates **EEGNet**, **SpatialCNN**, and **CNN + BiLSTM** across all 10 LOSO folds from scratch. | **15 – 25 min** | Checkpoints in `results/models/` (`eegnet_fold_*.pt`, `spatialcnn_fold_*.pt`, `cnn_bilstm_fold_*.pt`), metric logs |
+| **6** | `python src/training/dann_loso.py` | Trains and evaluates the **DANN** domain-adversarial model with GRL $\alpha_p$ schedule across all 10 LOSO folds. | **10 – 15 min** | Checkpoints in `results/models/` (`dann_eegnet_fold_*.pt`), `dann_eegnet_loso_results.json`, `.csv` |
+| **7** | `python src/visualization/generate_plots.py` | Generates all 8 publication-ready figures. | **15 – 20 sec** | `results/figures/*.png` |
+| **8** | `pytest -v` | Executes the full automated test suite (28/28 unit tests). | **~10 – 20 sec** | All 28 tests passing |
+
+---
 
 ### 3. Launch Interactive Streamlit Demo
+
+Once the preprocessed data and checkpoints are generated (or restored):
 
 ```bash
 streamlit run app/app.py
 ```
-Open **`http://localhost:8501`** in your browser to inspect single-trial held-out waveforms, execute live inference across subjects, and explore the viva benchmark dashboard.
-
-### 4. Reproduce the Entire Experimental Pipeline (Optional)
-
-```bash
-# Step 1: Download PhysioNet EDF files (S001-S010)
-python src/data/download_dataset.py
-
-# Step 2: Verify data integrity and channels
-python src/data/verify_raw.py
-
-# Step 3: Run filtering, normalization, and trial extraction
-python src/data/extract_trials.py
-
-# Step 4: Run CSP+LDA 10-Fold LOSO Benchmark
-python src/training/loso.py
-
-# Step 5: Run Deep Learning Models (EEGNet, SpatialCNN, CNN+BiLSTM) 10-Fold LOSO
-python src/training/deep_loso.py
-
-# Step 6: Run DANN (Domain Adaptation) 10-Fold LOSO
-python src/training/dann_loso.py
-
-# Step 7: Generate Publication Figures
-python src/visualization/generate_plots.py
-```
+Open **`http://localhost:8501`** in your browser. The application features:
+- **Held-Out Sample Selector:** Pick any subject (S001–S010) and any of the 90 held-out test trials.
+- **Model Forward Pass:** Executes real PyTorch inference on CPU and compares predicted class against ground-truth cue.
+- **EEG Waveform Inspection:** Plots motor channels C3, Cz, C4 and 16-channel scalp topography.
+- **Self-Contained Viva Dashboard:** Includes the full 5-method comparison table and per-subject breakdown matrix.
 
 ---
 
@@ -232,6 +234,15 @@ python src/visualization/generate_plots.py
 
 ---
 
-## 📜 License & Citation
+## 📖 Citation & Dataset Acknowledgment
 
-This project is licensed under the MIT License. Developed for research and educational purposes in Brain-Computer Interfaces and Deep Learning.
+This academic research project utilizes the open-access **PhysioNet EEG Motor Movement/Imagery Dataset (EEGMMIDB)**. We gratefully acknowledge the creators and maintainers of PhysioNet and BCI2000 for making this valuable benchmark available to the scientific community:
+
+- **PhysioNet Resource:** Goldberger, A. L., Amaral, L. A. N., Glass, L., Hausdorff, J. M., Ivanov, P. Ch., Mark, R. G., Mietus, J. E., Moody, G. B., Peng, C.-K., & Stanley, H. E. (2000). "PhysioBank, PhysioToolkit, and PhysioNet: Components of a New Research Resource for Complex Physiologic Signals." *Circulation*, 101(23), e215–e220.
+- **BCI2000 Instrumentation:** Schalk, G., McFarland, D. J., Hinterberger, T., Birbaumer, N., & Wolpaw, J. R. (2004). "BCI2000: A General-Purpose Brain-Computer Interface (BCI) System." *IEEE Transactions on Biomedical Engineering*, 51(6), 1034–1043.
+
+---
+
+## 📜 License
+
+This project is open-sourced under the [MIT License](LICENSE). Developed for academic research, education, and benchmarking in brain-computer interfaces and domain adaptation.

@@ -62,3 +62,32 @@ def test_load_benchmark_metrics():
         assert name in metrics
         assert "mean_accuracy" in metrics[name]
         assert "per_fold" in metrics[name]
+
+
+def test_app_mismatch_and_match_logic():
+    """Verify that the app's inference logic detects both MATCH and MISMATCH across multiple subjects."""
+    test_cases = [
+        # (subject, trial_index, expected_is_match)
+        ("S001", 0, False),  # S001 trial 1 (index 0): GT=1, Pred=0 -> Mismatch
+        ("S001", 5, True),   # S001 trial 6 (index 5): GT=1, Pred=1 -> Match
+        ("S005", 1, False),  # S005 trial 2 (index 1): GT=0, Pred=1 -> Mismatch
+        ("S006", 1, False),  # S006 trial 2 (index 1): GT=1, Pred=0 -> Mismatch
+        ("S006", 0, True),   # S006 trial 1 (index 0): GT=1, Pred=1 -> Match
+    ]
+
+    for subj, trial_idx, expect_match in test_cases:
+        X, y = load_subject_data(subj)
+        model = load_trained_model("DANN (EEGNet Backbone)", subj)
+        pred_class, conf, probs = run_inference(model, X[trial_idx], "DANN (EEGNet Backbone)")
+        gt = int(y[trial_idx])
+
+        is_match = (pred_class == gt)
+        assert is_match == expect_match, f"Failed for {subj} trial {trial_idx}: pred={pred_class}, gt={gt}"
+        
+        # Verify UI badge strings
+        status_badge = '<span class="badge-correct">✅ MATCH</span>' if is_match else '<span class="badge-incorrect">❌ MISMATCH</span>'
+        if expect_match:
+            assert "MATCH" in status_badge and "MISMATCH" not in status_badge
+        else:
+            assert "MISMATCH" in status_badge
+

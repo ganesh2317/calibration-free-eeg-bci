@@ -64,12 +64,13 @@
   - [x] Real test-sample inference demo (`app/app.py`)
   - [x] Real raw EEG waveform viewer and prediction confidence display
   - [x] Self-contained viva dashboard with 5-method comparison table and subject-by-subject LOSO matrix
-  - [x] Automated unit test suite passing (`tests/test_app.py`, 28/28 unit tests passing across project)
+  - [x] Automated unit test suite passing (`tests/test_app.py`, 29/29 unit tests passing across project)
 
 - [x] **Stage 9: Final Documentation & Git Repository Setup**
   - [x] Comprehensive `README.md` with system architecture, 5-model methodology, results analysis, viva insights, and reproduction steps
-  - [x] Configured `.gitignore` excluding `.venv/`, `data/raw/`, and bytecode/cache artifacts
-  - [x] Full automated test suite passing (28/28 tests, 100% pass rate)
+  - [x] Configured `.gitignore` excluding `.venv/`, `data/raw/`, `data/processed/`, and `results/models/` for size optimization
+  - [x] Added `LICENSE` (MIT) and PhysioNet / BCI2000 academic citation acknowledgments
+  - [x] Full automated test suite passing (29/29 tests, 100% pass rate)
   - [x] Git repository initialized and pushed to remote GitHub repository (`main` branch)
 
 ---
