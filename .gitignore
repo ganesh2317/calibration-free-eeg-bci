@@ -30,6 +30,7 @@ htmlcov/
 # Logs & temp files
 *.log
 .system_generated/
+.vercel/
 scratch/
 .DS_Store
 Thumbs.db

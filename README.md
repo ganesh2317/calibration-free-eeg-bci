@@ -2,10 +2,13 @@
 
 > **Zero-Shot Motor Imagery Intent Decoding Across Unseen Subjects via Domain-Adversarial Neural Networks**
 
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Live_Demo-black?logo=vercel)](https://web-ten-gray-py7tb98lpx.vercel.app)
 [![Python 3.13](https://img.shields.io/badge/Python-3.13-blue.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.14_CPU-ee4c2c.svg)](https://pytorch.org/)
 [![Streamlit App](https://img.shields.io/badge/Streamlit-1.63.0-FF4B4B.svg)](https://streamlit.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+> 🚀 **Live Interactive Web Demo on Vercel:** [https://web-ten-gray-py7tb98lpx.vercel.app](https://web-ten-gray-py7tb98lpx.vercel.app)
 
 ---
 

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calibration-Free Cross-Subject EEG-BCI | Live Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-icon">🧠</span>
+        <div>
+          <h2>EEG-BCI Demo</h2>
+          <span class="brand-badge">10-Fold LOSO</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <label for="subjectSelect" class="input-label">Select Held-Out Subject (Fold):</label>
+        <select id="subjectSelect" class="form-select">
+          <option value="S001">S001 (Fold 1)</option>
+          <option value="S002">S002 (Fold 2)</option>
+          <option value="S003">S003 (Fold 3)</option>
+          <option value="S004">S004 (Fold 4)</option>
+          <option value="S005">S005 (Fold 5)</option>
+          <option value="S006">S006 (Fold 6)</option>
+          <option value="S007">S007 (Fold 7)</option>
+          <option value="S008">S008 (Fold 8)</option>
+          <option value="S009">S009 (Fold 9)</option>
+          <option value="S010">S010 (Fold 10)</option>
+        </select>
+        <p class="field-hint">The target subject was completely held out during training.</p>
+      </div>
+
+      <div class="sidebar-section">
+        <label for="modelSelect" class="input-label">Select Model Architecture:</label>
+        <select id="modelSelect" class="form-select">
+          <option value="DANN (EEGNet Backbone)" selected>DANN (EEGNet Backbone) ★</option>
+          <option value="EEGNet">EEGNet (Lawhern 2018)</option>
+          <option value="SpatialCNN">SpatialCNN (Custom 2D)</option>
+          <option value="CNN + BiLSTM">CNN + BiLSTM (Hybrid)</option>
+        </select>
+        <p class="field-hint">DANN employs GRL domain invariance across source subjects.</p>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="slider-header">
+          <label for="trialSlider" class="input-label">Held-Out Test Trial:</label>
+          <span id="trialDisplayBadge" class="badge-num">Trial 1 / 90</span>
+        </div>
+        <input type="range" id="trialSlider" min="1" max="90" value="1" class="form-range">
+        
+        <div class="quick-btn-group">
+          <button id="btnRandom" class="btn btn-secondary">🎲 Random</button>
+          <button id="btnNextLeft" class="btn btn-secondary">👈 Next Left</button>
+          <button id="btnNextRight" class="btn btn-secondary">👉 Next Right</button>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <label class="input-label">Channel Display:</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="channelMode" value="triad" checked> Motor Triad (C3, Cz, C4)
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="channelMode" value="c3"> C3 (Left Motor Cortex)
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="channelMode" value="c4"> C4 (Right Motor Cortex)
+          </label>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <p>PhysioNet EEGMMIDB Benchmark</p>
+        <a href="https://github.com/ganesh2317/calibration-free-eeg-bci" target="_blank" rel="noopener">GitHub Repository ↗</a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <header class="app-header">
+        <div class="header-titles">
+          <h1>🧠 Calibration-Free Cross-Subject EEG-BCI</h1>
+          <p class="subtitle">Zero-Shot Motor Imagery Intent Decoding across Held-Out Subjects (10-Fold LOSO Benchmark)</p>
+        </div>
+      </header>
+
+      <!-- Scientific Disclaimer Banner -->
+      <div class="disclaimer-banner">
+        <div class="disclaimer-icon">🔬</div>
+        <div class="disclaimer-text">
+          <strong>Zero-Calibration LOSO Evaluation Setting & Hardware Notice:</strong>
+          <span>Real offline forward inference executed on genuine held-out test data from the PhysioNet EEG Motor Movement/Imagery Dataset (EEGMMIDB). Under strict Leave-One-Subject-Out (LOSO) validation, the model checkpoint was trained exclusively on the other 9 subjects — zero calibration data was seen from the test subject. <em>⚠️ Notice: Predictions come from held-out benchmark trials. No live EEG headset is connected.</em></span>
+        </div>
+      </div>
+
+      <!-- Inference Metric Cards -->
+      <section class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Subject & Fold</div>
+          <div id="metricSubject" class="metric-val text-blue">S001 (Fold 1)</div>
+          <div id="metricTrialNum" class="metric-sub">Trial #1 of 90</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">Ground-Truth Label</div>
+          <div id="metricGt" class="metric-val">
+            <span class="badge-gt badge-right">✋ Right Hand</span>
+          </div>
+          <div id="metricCueInfo" class="metric-sub">Class 1 (T2 Cue)</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">Model Prediction</div>
+          <div id="metricPred" class="metric-val">
+            <span class="badge-gt badge-left">✋ Left Hand</span>
+          </div>
+          <div id="metricStatus" class="metric-sub">
+            <span class="badge-status badge-mismatch">❌ MISMATCH</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">Prediction Confidence</div>
+          <div id="metricConf" class="metric-val text-green">61.34%</div>
+          <div class="metric-sub">Softmax Probability</div>
+        </div>
+      </section>
+
+      <!-- Probabilities & Fold Performance -->
+      <section class="prob-section">
+        <div class="prob-card">
+          <h3>Posterior Class Probability Distribution</h3>
+          <div class="prob-bars">
+            <div class="prob-row">
+              <div class="prob-labels">
+                <span>Left Hand (Class 0)</span>
+                <span id="probValLeft" class="prob-num">61.3%</span>
+              </div>
+              <div class="progress-track">
+                <div id="probBarLeft" class="progress-fill fill-blue" style="width: 61.3%;"></div>
+              </div>
+            </div>
+
+            <div class="prob-row">
+              <div class="prob-labels">
+                <span>Right Hand (Class 1)</span>
+                <span id="probValRight" class="prob-num">38.7%</span>
+              </div>
+              <div class="progress-track">
+                <div id="probBarRight" class="progress-fill fill-orange" style="width: 38.7%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fold-card">
+          <h3>Fold Benchmark Context</h3>
+          <div class="fold-stats">
+            <div class="stat-item">
+              <span class="stat-label">Subject Held-Out:</span>
+              <strong id="foldSubjectName">S001</strong>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Fold Accuracy:</span>
+              <strong id="foldAccVal" class="text-blue">64.44%</strong>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Fold F1-Score:</span>
+              <strong id="foldF1Val">51.52%</strong>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Evaluated Architecture:</span>
+              <strong id="foldModelName">DANN (EEGNet)</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- EEG Waveform Viewer -->
+      <section class="waveform-section">
+        <div class="section-header">
+          <h3>📈 Single-Trial EEG Waveform (C3, Cz, C4 @ 160 Hz Bandpass 8–30 Hz)</h3>
+          <div class="waveform-legend">
+            <span class="legend-item"><span class="legend-dot color-c3"></span> C3 (Left Motor Cortex)</span>
+            <span class="legend-item"><span class="legend-dot color-cz"></span> Cz (Vertex / Midline)</span>
+            <span class="legend-item"><span class="legend-dot color-c4"></span> C4 (Right Motor Cortex)</span>
+            <span class="legend-item"><span class="legend-dot color-cue"></span> Cue Onset (t=0s)</span>
+          </div>
+        </div>
+
+        <div class="canvas-container">
+          <canvas id="waveformCanvas"></canvas>
+        </div>
+
+        <details class="accordion-details">
+          <summary>💡 Sensorimotor Rhythm (ERD/ERS) Physiological Context & Domain Adaptation</summary>
+          <div class="accordion-content">
+            <p><strong>Contra-lateral Desynchronization (ERD):</strong> Left-hand motor imagery typically attenuates &mu; (8–12 Hz) and &beta; (16–24 Hz) oscillations over the right sensorimotor cortex (channel <strong>C4</strong>), while right-hand imagery attenuates oscillations over the left sensorimotor cortex (channel <strong>C3</strong>).</p>
+            <p><strong>Inter-Subject Non-Stationarity:</strong> Across different human subjects, skull geometry, electrode impedance, and cortical folding vary dramatically, causing severe covariate shift in standard deep models.</p>
+            <p><strong>Domain Invariance (DANN):</strong> The Domain-Adversarial Neural Network uses a Gradient Reversal Layer (GRL) during source subject training to encourage the feature extractor to discard subject-identifying noise while preserving motor intent.</p>
+          </div>
+        </details>
+      </section>
+
+      <!-- Viva Reference Dashboard -->
+      <section class="dashboard-section">
+        <div class="section-header">
+          <h3>📋 Viva Reference Dashboard</h3>
+        </div>
+
+        <div class="tabs-container">
+          <div class="tab-buttons">
+            <button class="tab-btn active" data-tab="tabOverview">📊 Dataset & Pipeline</button>
+            <button class="tab-btn" data-tab="tabBenchmarks">🏆 5-Method Benchmark</button>
+            <button class="tab-btn" data-tab="tabFolds">🎯 Subject Breakdown</button>
+          </div>
+
+          <!-- Tab 1 -->
+          <div id="tabOverview" class="tab-pane active">
+            <div class="overview-grid">
+              <div class="info-card">
+                <h4>Dataset Specifications</h4>
+                <ul>
+                  <li><strong>Cohort:</strong> 10 subjects (S001–S010)</li>
+                  <li><strong>Total Trials:</strong> 900 epochs</li>
+                  <li><strong>Per Subject:</strong> 90 epochs (45 Left, 45 Right)</li>
+                  <li><strong>Class Balance:</strong> Perfectly balanced (50.0% / 50.0%)</li>
+                </ul>
+              </div>
+              <div class="info-card">
+                <h4>Signal Parameters</h4>
+                <ul>
+                  <li><strong>Sampling Rate:</strong> 160.0 Hz</li>
+                  <li><strong>Electrode Array:</strong> 64 EEG channels</li>
+                  <li><strong>Epoch Duration:</strong> 4.0 seconds (640 timepoints)</li>
+                  <li><strong>FIR Bandpass:</strong> 8.0 – 30.0 Hz zero-phase</li>
+                </ul>
+              </div>
+              <div class="info-card">
+                <h4>Validation Protocol</h4>
+                <ul>
+                  <li><strong>Scheme:</strong> 10-Fold LOSO</li>
+                  <li><strong>Calibration:</strong> Exactly 0 calibration trials</li>
+                  <li><strong>Train / Val / Test Split:</strong>
+                    8 source / 1 val / 1 held-out test
+                  </li>
+                  <li><strong>Leakage Prevention:</strong> Strict isolation</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2 -->
+          <div id="tabBenchmarks" class="tab-pane">
+            <p class="tab-lead">Real Measured 10-Fold LOSO Evaluation Metrics Across All Evaluated Architectures:</p>
+            <div class="table-responsive">
+              <table class="data-table" id="benchmarkTable">
+                <thead>
+                  <tr>
+                    <th>Architecture</th>
+                    <th>Calibration</th>
+                    <th>Accuracy (Mean ± Std)</th>
+                    <th>Precision</th>
+                    <th>Recall</th>
+                    <th>F1-Score</th>
+                    <th>Cohen's &kappa;</th>
+                  </tr>
+                </thead>
+                <tbody id="benchmarkTableBody">
+                  <!-- Populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+            <p class="table-caption">💡 DANN achieves the highest deep learning accuracy (59.33 ± 8.13%), competitive with classical CSP+LDA (59.89 ± 9.52%) while offering end-to-end differentiable feature extraction.</p>
+          </div>
+
+          <!-- Tab 3 -->
+          <div id="tabFolds" class="tab-pane">
+            <p class="tab-lead">Subject-by-Subject LOSO Accuracy Across All 10 Folds (%):</p>
+            <div class="table-responsive">
+              <table class="data-table" id="foldMatrixTable">
+                <thead>
+                  <tr>
+                    <th>Subject</th>
+                    <th>CSP + LDA</th>
+                    <th>EEGNet</th>
+                    <th>SpatialCNN</th>
+                    <th>CNN + BiLSTM</th>
+                    <th>DANN (Ours)</th>
+                  </tr>
+                </thead>
+                <tbody id="foldMatrixTableBody">
+                  <!-- Populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
