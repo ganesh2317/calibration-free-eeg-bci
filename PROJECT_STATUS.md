@@ -73,7 +73,7 @@
   - [x] Full automated test suite passing (29/29 tests, 100% pass rate)
   - [x] Git repository initialized and pushed to remote GitHub repository (`main` branch)
 
-- [x] **Stage 10: Professional UI Redesign & Model Comparison Module**
+- [x] **Stage 10: Professional UI Redesign & Model Comparison Module (Fully Test-Covered)**
   - [x] Full app redesign with neuro-tech clinical palette (`app/app.py`): dark gradient hero banner, card-based panels, custom tab bar (teal/blue, no default red), Google Inter typography, consistent `#0284C7` / `#0D9488` / `#0F172A` color tokens across all tabs
   - [x] Prominent stylized prediction result card: Ground-Truth, Model Prediction, Match/Mismatch badge, Confidence, Fold Benchmark — all in a single visual hero row
   - [x] New **"⚖️ Model Comparison"** tab with:
@@ -85,7 +85,15 @@
   - [x] Verdict logic verified for honesty: DANN vs CSP+LDA (0.56% gap, 15–17× smaller than std) correctly reads as **"Effectively Tied"** with ±1σ overlap region [51.2%–67.5%] = 16.3 pp wide
   - [x] `scripts/test_verdicts_final.py` executed with real output for all 3 pairs (see Verdict Output section below)
   - [x] Full 5-model chart confirmed with real bar values: CSP+LDA=59.89%, EEGNet=52.44%, SpatialCNN=55.33%, CNN+BiLSTM=57.33%, DANN=59.33%
-  - [x] All 29/29 pytest tests passing (0 failures, 1 harmless docstring SyntaxWarning fixed)
+  - [x] **Refactored comparison math** into pure-Python `src/utils/comparison.py` (zero Streamlit dependency); `generate_comparison_verdict()` in `app/app.py` is now a thin text-formatting wrapper
+  - [x] **4 new pytest tests** added in `tests/test_app.py`:
+    - `test_comparison_small_gap_is_noise_dominated` — synthetic tie (1pp gap, ±9–12% std → "Effectively Tied")
+    - `test_comparison_large_gap_declares_winner` — synthetic clear winner (15pp gap, ±3–4% std → "ModelA")
+    - `test_dann_vs_csp_lda_real_data_is_tied` — **regression guard** against real `results/metrics/*.json`: DANN vs CSP+LDA MUST be "Effectively Tied"; any future threshold change that breaks this is caught immediately
+    - `test_fold_win_count_is_correct_for_known_synthetic_pair` — 10-fold tally verified against hand-enumerated ground-truth (wins_a=3, wins_b=3, ties=4)
+  - [x] All **33/33 pytest tests passing** (0 failures, 49.31s) — up from 29/29
+  - [x] Committed and pushed: `646f5ee..4acf524  main -> main` (GitHub: `ganesh2317/calibration-free-eeg-bci`)
+
 
 ---
 
