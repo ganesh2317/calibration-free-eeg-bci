@@ -11,9 +11,6 @@ data/processed/*
 !data/processed/.gitkeep
 data/subjects/
 
-# Model checkpoints (regenerable via src/training scripts)
-results/models/*
-!results/models/.gitkeep
 
 # Python cache & bytecode
 __pycache__/
